@@ -32,6 +32,7 @@ runs:
       run: |
         touch ~/.netrc
         echo ${{ inputs.netrc }} >> ~/.netrc
+        git config --global credential.helper "netrc -v -f ~/.netrc"
     - name: Distribute
       shell: python
       env:
