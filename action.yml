@@ -1,0 +1,42 @@
+name: "RedSock/Distribute"
+description: "Copies source code to another git system"
+
+author: "RedSock"
+
+branding:
+  icon: "shuffle"
+  color: "red"
+
+inputs:
+  target_repos:
+    description: "Coma separated different origin urls"
+    required: true
+  target_repos_keys:
+    description: "Coma separated keys to access different origins. Must be at the same index as a repo in 'target-repos'"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.ref }}
+
+    - name: Dependencies
+      shell: bash
+      run: |
+        pip install GitPython
+
+    - name: Distribute
+      shell: python
+      env:
+        REPOS: ${{ inputs.target_repos }}
+        KEYS: ${{ inputs.target_repos_keys-repos }}
+      run: |
+        import GitPython
+        import os
+        
+        repos = []
+        rp = os.environ['REPOS'].split(',')
+        for r in rp:
+            repos.append([r])
