@@ -30,7 +30,7 @@ runs:
     - name: Prepare netrc
       shell: bash
       run: |
-        echo ${{ inputs.netrc }} >> ~/.netrc
+        echo ${{ inputs.netrc }} >> .netrc
     - name: Distribute
       shell: python
       env:
