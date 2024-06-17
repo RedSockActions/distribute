@@ -9,11 +9,9 @@ branding:
 
 inputs:
   target_repos:
-    description: "Coma separated different origin urls"
+    description: "Coma separated different origin urls with auth"
     required: true
-  netrc:
-    description: "Login info in netrc format"
-    required: true
+
 runs:
   using: "composite"
   steps:
@@ -27,12 +25,6 @@ runs:
       run: |
         pip install GitPython
 
-    - name: Prepare netrc
-      shell: bash
-      run: |
-        touch ~/.netrc
-        echo ${{ inputs.netrc }} >> ~/.netrc
-        git config --global credential.helper "netrc -v -f ~/.netrc"
     - name: Distribute
       shell: python
       env:
@@ -45,13 +37,13 @@ runs:
         repos_urls = os.environ['REPOS'].split(',')
         
         repo = git.Repo('./')
-      
-        for rep in repos_urls:
-          remote_name = rep.replace("/", "_").replace("https:__", "")
+              
+        for idx, _ in enumerate(repos_urls):
+          remote_name = str(idx)
           if repo.remotes.__contains__(remote_name):
             try:
               repo.delete_remote(git.Remote(repo, remote_name))
             except git.exc.GitCommandError:
               pass
-          repo.create_remote(remote_name, rep)
+          repo.create_remote(remote_name, repos_urls[idx])
           repo.remote(remote_name).push()
