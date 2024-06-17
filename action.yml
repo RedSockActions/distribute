@@ -26,6 +26,7 @@ runs:
         REPOS: ${{ inputs.TARGET_REPOS }}
       run: |
         IFS=';' read -ra ADDR <<< "$REPOS"
+        git fetch --unshallow origin
         for i in "${ADDR[@]}"; do
           git remote remove origin  
           git remote add origin "$i"
