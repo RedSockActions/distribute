@@ -8,7 +8,7 @@ branding:
   color: "red"
 
 inputs:
-  target_repos:
+  TARGET_REPOS:
     description: "Coma separated different origin urls with auth"
     required: true
 
@@ -20,30 +20,15 @@ runs:
       with:
         ref: ${{ github.ref }}
 
-    - name: Dependencies
-      shell: bash
-      run: |
-        pip install GitPython
-
     - name: Distribute
-      shell: python
+      shell: bash
       env:
-        REPOS: ${{ inputs.target_repos }}
-        KEYS: ${{ inputs.target_repos_keys-repos }}
+        REPOS: ${{ inputs.TARGET_REPOS }}
       run: |
-        import git
-        import os
-        
-        repos_urls = os.environ['REPOS'].split(',')
-        
-        repo = git.Repo('./')
-              
-        for idx, _ in enumerate(repos_urls):
-          remote_name = str(idx)
-          if repo.remotes.__contains__(remote_name):
-            try:
-              repo.delete_remote(git.Remote(repo, remote_name))
-            except git.exc.GitCommandError:
-              pass
-          repo.create_remote(remote_name, repos_urls[idx])
-          repo.remote(remote_name).push()
+        IFS=';' read -ra ADDR <<< "$REPOS"
+        for i in "${ADDR[@]}"; do
+          git remote rename origin old-origin
+          git remote add origin "$i"
+          git push --set-upstream origin --all
+          git push --set-upstream origin --tags
+        done
